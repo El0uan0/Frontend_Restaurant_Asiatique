@@ -294,8 +294,8 @@ public class MainController {
         Button btnAdd = new Button(bundle.getString("menu.add"));
         btnAdd.getStyleClass().add("btn-add-product");
 
-        if (!product.isAvailable()) {
-            btnAdd.setText("INDISPONIBLE");
+        if (!product.isAvailable() || product.getStockQuantity() <= 0) {
+            btnAdd.setText("Indisponible");
             btnAdd.setDisable(true);
             btnAdd.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; -fx-border-color: #dc2626; -fx-font-weight: bold; -fx-opacity: 1;");
             name.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 24px;");
@@ -479,7 +479,8 @@ public class MainController {
         HBox actions = new HBox(20);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        Spinner<Integer> spinner = new Spinner<>(1, 10, 1);
+        int maxQty = product.getStockQuantity() > 0 ? product.getStockQuantity() : 1;
+        Spinner<Integer> spinner = new Spinner<>(1, Math.min(10, maxQty), 1);
         spinner.setStyle("-fx-font-size: 20px;");
         spinner.setPrefHeight(50);
         spinner.setPrefWidth(100);
@@ -488,18 +489,24 @@ public class MainController {
         btnAddCart.getStyleClass().add("btn-start");
         btnAddCart.setStyle("-fx-font-size: 22px; -fx-padding: 10 40;");
 
-        btnAddCart.setOnAction(e -> {
-            List<String> options = optionsSupplier.get();
-            cartService.addProduct(product, spinner.getValue(), options);
+        if (product.getStockQuantity() <= 0) {
+            btnAddCart.setDisable(true);
+            btnAddCart.setText("ÉPUISÉ");
+            btnAddCart.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #dc2626; -fx-font-size: 22px; -fx-padding: 10 40;");
+        } else {
+            btnAddCart.setOnAction(e -> {
+                List<String> options = optionsSupplier.get();
+                cartService.addProduct(product, spinner.getValue(), options);
 
-            // Afficher les suggestions intelligentes après l'ajout
-            showSmartSuggestionsAfterAdding(product);
+                // Afficher les suggestions intelligentes après l'ajout
+                showSmartSuggestionsAfterAdding(product);
 
-            // Retour au menu avec un petit délai
-            PauseTransition delay = new PauseTransition(Duration.millis(100));
-            delay.setOnFinished(event -> showMenuScreen());
-            delay.play();
-        });
+                // Retour au menu avec un petit délai
+                PauseTransition delay = new PauseTransition(Duration.millis(100));
+                delay.setOnFinished(event -> showMenuScreen());
+                delay.play();
+            });
+        }
 
         actions.getChildren().addAll(spinner, btnAddCart);
 

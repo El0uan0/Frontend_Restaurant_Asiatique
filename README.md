@@ -22,15 +22,10 @@ git clone <URL_DU_REPO_FRONTEND>
 cd Frontend_Restaurant_Asiatique
 ```
 
-### 2. Compiler le projet
+### 2. Lancer l'application
+Utilisez Maven pour nettoyer, compiler et démarrer l'interface :
 ```bash
-mvn clean install
-```
-
-### 3. Lancer l'application
-Utilisez le plugin JavaFX de Maven pour démarrer l'interface :
-```bash
-mvn javafx:run
+mvn clean javafx:run
 ```
 
 ## Structure
